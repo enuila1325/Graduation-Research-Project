@@ -14,9 +14,8 @@ def main():
             transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
         ]
     )
-    device = 'cuda'
-    model = torch.load('./model_alzheimer-47_epochs-93Validation.pth', map_location=device)
-    red = image_classificator(4).to(device=device)
+    model = torch.load('./model_alzheimer-47_epochs-93Validation.pth', map_location='cuda')
+    red = image_classificator(4).to('cuda')
     red.load_state_dict(model["model_state_dict"])
     print("Model loaded and sent to CUDA")
     classes = ['Mild Demented','Moderated Demented', 'Non Demented', 'Very Mild Demented']
@@ -28,7 +27,7 @@ def main():
     print("Image transformed\nPredicting...")
     red.eval()
     with torch.no_grad():
-        output = red(image_to_predict.to(device=device))
+        output = red(image_to_predict.to('cuda'))
     output_label = torch.topk(output, 1)
     predicted_class = classes[int(output_label.indices)]
     print('This image represents a brain MRI that has', predicted_class)

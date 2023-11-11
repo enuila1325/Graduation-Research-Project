@@ -9,8 +9,8 @@ class image_classificator(nn.Module):
         self.conv_2 = nn.Conv2d(32, 64, 3)
         self.conv_3 = nn.Conv2d(64, 128, 3)
 
-        self.linear_1 = nn.Linear(128, 16)
-        self.linear_2 = nn.Linear(16, self.out)
+        self.linear_1 = nn.Linear(128, 32)
+        self.linear_2 = nn.Linear(32, self.out)
         
         
         self.pool = nn.MaxPool2d(2,2)

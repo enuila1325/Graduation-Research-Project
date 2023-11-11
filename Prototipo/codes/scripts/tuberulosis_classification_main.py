@@ -16,7 +16,7 @@ def main():
     )
     device = 'cuda'
     model = torch.load('./model_tuberculosis.pth', map_location=device)
-    red = image_classificator(2).to(device=device)
+    red = image_classificator(2).to('cuda')
     red.load_state_dict(model["model_state_dict"])
     print("Model loaded and sent to CUDA")
     classes = ['healthy lungs','tuberculosis']

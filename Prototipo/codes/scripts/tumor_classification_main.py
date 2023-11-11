@@ -1,4 +1,4 @@
-from image_classificator_nn import image_classificator
+from brain_tumor_classification_nn import image_classificator
 from torchvision.transforms import transforms
 import torch
 import cv2
@@ -16,7 +16,7 @@ def main():
     )
     device = 'cuda'
     model = torch.load('./model_tumor.pth', map_location=device)
-    red = image_classificator(4).to(device=device)
+    red = image_classificator(4).to('cuda')
     red.load_state_dict(model["model_state_dict"])
     print("Model loaded and sent to CUDA")
     classes = ['glioma','meningioma','no_tumor','pituitary']
