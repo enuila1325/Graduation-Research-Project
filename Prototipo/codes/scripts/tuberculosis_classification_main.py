@@ -1,4 +1,4 @@
-from image_classificator_nn import image_classificator
+from tuberculosis_classification_nn import image_classificator
 from torchvision.transforms import transforms
 from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
@@ -11,13 +11,11 @@ import time
 import cv2
 import sys
 
-
 from sklearn.metrics import (
     classification_report,
     confusion_matrix,
     ConfusionMatrixDisplay,
 )
-
 
 def main():
     image_route = sys.argv[1]
@@ -28,20 +26,12 @@ def main():
             transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
         ]
     )
-    device = "cuda"
-    model = torch.load(
-        "./model_alzheimer-47_epochs-93Validation.pth", map_location="cuda"
-    )
-    red = image_classificator(4).to("cuda")
+    device = 'cuda'
+    model = torch.load('./model_tuberculosis.pth', map_location=device)
+    red = image_classificator(2).to('cuda')
     red.load_state_dict(model["model_state_dict"])
     print("Model loaded and sent to CUDA")
-    classes = [
-        "Mild Demented",
-        "Moderated Demented",
-        "Non Demented",
-        "Very Mild Demented",
-    ]
-
+    classes = ['healthy lungs','tuberculosis'] 
     validation_dataset = ImageFolder(root=image_route, transform=images_transform)
     validation_dataset_loader = DataLoader(
         validation_dataset,
@@ -81,6 +71,6 @@ def main():
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=classes)
     disp.plot()
     plt.show()
-
-if __name__ == "__main__":
+    
+if __name__ == '__main__':
     main()
