@@ -30,16 +30,16 @@ def main():
     )
     device = "cuda"
     model = torch.load(
-        "./model_alzheimer-47_epochs-93Validation.pth", map_location="cuda"
+        "./alzheimer-model.pth", map_location="cuda"
     )
     red = image_classificator(4).to("cuda")
     red.load_state_dict(model["model_state_dict"])
     print("Model loaded and sent to CUDA")
     classes = [
-        "Mild Demented",
-        "Moderated Demented",
-        "Non Demented",
-        "Very Mild Demented",
+        "Mild",
+        "Moderated",
+        "Healthy",
+        "Very Mild",
     ]
 
     validation_dataset = ImageFolder(root=image_route, transform=images_transform)

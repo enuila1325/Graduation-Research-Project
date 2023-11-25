@@ -8,20 +8,13 @@ import seaborn as sns
 import torch.nn as nn
 import torch.optim as optim
 
-import matplotlib.pyplot as plt
-from tqdm.auto import tqdm
-
-from sklearn.metrics import (
-    classification_report,
-    confusion_matrix,
-    ConfusionMatrixDisplay,
-)
-
+from image_classificator_nn import image_classificator
 from auxiliar_functions import save_model, save_plots
-from brain_tumor_classification_nn import image_classificator
+from sklearn.metrics import classification_report
 from torchvision.transforms import transforms
 from torchvision.datasets import ImageFolder
 from torch.utils.data import DataLoader
+from tqdm.auto import tqdm
 
 
 # argument parser
@@ -112,11 +105,13 @@ def main():
     print(f"Training and validating using: {device}")
     print(f"Training classes: {training_dataset.classes}")
     outs = len(training_dataset.classes)
-    print(f"CNN having {outs} outputs")
+    print(f"Beginning training for CNN having {outs} outputs")
     model = image_classificator(out=outs)
     if use_cuda:
         model = model.to(device)
         print("Model sent to CUDA")
+    else:
+        print("Model sent to CPU")
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(params=model.parameters(), lr=learning_rate)
     minimun_valid_loss = np.inf
@@ -135,13 +130,17 @@ def main():
     tolerance = 20
     trigger = 0
     final_epoch = 0
-
-    # Training the network through all the epochs
+    
+    # Lists for storing metrics over time
     train_loss, train_acc = [], []
     validation_loss, validation_acc = [], []
-    y_values_temp, predictions_temp = [], []
     y_values, predictions = [], []
-    recall_validation, f1_score_validation = [], []
+    recall_validation, f1_score_validation, precision_validation = [], [], []
+    
+    # Lists for storing predictions and true values for classification report
+    y_values_temp, predictions_temp = [], []
+    
+    # Begin iterations over epochs 
     for epoch in range(epochs):
         print(f"INFO: Epoch [{epoch+1}] of [{epochs}]")
         epoch_loss_training, epoch_accurracy_training = training(
@@ -150,70 +149,76 @@ def main():
         epoch_loss_validation,epoch_accurracy_validation,y_values_temp,predictions_temp = validate(
             model, validation_dataset_loader, criterion, device
         )
+        
         # storing loss and accurracy values for plotting them
         train_loss.append(epoch_loss_training)
         train_acc.append(epoch_accurracy_training)
         validation_loss.append(epoch_loss_validation)
         validation_acc.append(epoch_accurracy_validation)
+        
+        y_values = y_values_temp
+        predictions = predictions_temp
+        y_values = [i[0] for i in y_values]
+        predictions = [i[0] for i in predictions]
+        results = {}
 
+        results = classification_report(
+                y_values,
+                predictions,
+                zero_division=0,
+                target_names=training_dataset.classes,
+                output_dict=True,
+        )
+        # storing f-1, recall and precision
+        for label in training_dataset.classes:
+            recall_validation.append(results[label]["recall"])  # type: ignore
+            f1_score_validation.append(results[label]["f1-score"])  # type: ignore
+            precision_validation.append(results[label]["f1-score"]) # type: ignore
+
+        # loss feedback
         print(
             f"Training loss: {epoch_loss_training:.3f}, training acc: {epoch_accurracy_training:.3f}"
         )
         print(
             f"Validation loss: {epoch_loss_validation:.3f}, validation acc: {epoch_accurracy_validation:.3f}"
         )
+        
+        # printing classification report for each epoch of training
+        print(
+            classification_report(
+                y_values,
+                predictions,
+                zero_division=0,
+                target_names=training_dataset.classes,
+            )
+        )
         last_loss = epoch_loss_validation
         if last_loss < current_loss:
             print(
                 f"Validation loss decreased from {current_loss:.3f} to {last_loss:.3f}, saving current model"
             )
-            current_loss = last_loss
-            final_epoch = epoch
-            final_epoch += 1
-            y_values = y_values_temp
-            predictions = predictions_temp
-            y_values = [i[0] for i in y_values]
-            predictions = [i[0] for i in predictions]
-            results = {}
-
-            results = classification_report(
-                y_values,
-                predictions,
-                zero_division=0,
-                target_names=training_dataset.classes,
-                output_dict=True,
-            )
-            for label in training_dataset.classes:
-                recall_validation.append(results[label]["recall"])  # type: ignore
-                f1_score_validation.append(results[label]["f1-score"])  # type: ignore
-
-            print(
-                classification_report(
-                    y_values,
-                    predictions,
-                    zero_division=0,
-                    target_names=training_dataset.classes,
-                )
-            )
-            
             print("-" * 200)
             # save the trained model weights
             save_model(epochs, model, optimizer, criterion, model_route)
             trigger = 0
+            current_loss = last_loss
+            final_epoch = epoch
+            final_epoch += 1
         else:
             print(
-                f"Current validation didn't decreased from las saved value nor improved last saved model."
+                f"Current validation didn't decreased from last saved value nor improved last saved model."
             )
             trigger += 1
         print("-" * 200)
         time.sleep(2)
         if trigger >= tolerance:
             print(
-                f"Validation hasn't decreased in a while. Ending training and validation proccess.\nKeeping saved model at epoch {final_epoch}"
+                f"Validation hasn't decreased in a while. Finishing training and validation proccess.\nKeeping saved model at epoch {final_epoch}"
             )
             break
 
-    # save the loss and accuracy plots
+    # save the loss, accuracy, f-1, recall and precision plots
+    print('Saving metrics plots')
     save_plots(
         train_acc,
         validation_acc,
@@ -221,6 +226,7 @@ def main():
         validation_loss,
         recall_validation,
         f1_score_validation,
+        precision_validation,
         training_dataset.classes,
     )
     print("TRAINING COMPLETE")
