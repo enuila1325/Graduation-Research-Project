@@ -51,7 +51,6 @@ def open_file_choser(disease):
     )
     label.pack(padx=5)
     frame.pack(padx=10, pady=50, expand=True, fill=tk.BOTH)
-    disease_to_detect = ""
     if disease == 4:
         diagnosis_number = image_classification(filename)
         predict_class = disease_prediction(filename, diagnosis_number)
@@ -80,7 +79,7 @@ def disease_prediction(filename, disease):
 
 def diagnosis_frame(predicted_class):
     app = App()
-    app.geometry("400x200")
+    app.geometry("800x200")
     frame = ttk.Frame(app)
     label = ttk.Label(frame, text=predicted_class)
     label.pack(padx=5)
@@ -145,7 +144,10 @@ def alzheimer_detection(image_route):
         output = red(image_to_predict.to("cuda"))
     output_label = torch.topk(output, 1)
     predicted_class = classes[int(output_label.indices)]
-    return predicted_class
+    return_value = "This image represents a brain MRI for Alzheimer Disease diagnosis.\n\nThis image shows a brain with: "
+    return_value += predicted_class
+    return_value += " state of the disease"
+    return return_value
 
 
 def brain_tumor_detection(image_route):
@@ -172,7 +174,9 @@ def brain_tumor_detection(image_route):
         output = red(image_to_predict.to("cuda"))
     output_label = torch.topk(output, 1)
     predicted_class = classes[int(output_label.indices)]
-    return predicted_class
+    return_value = "This image represents an MRI used for brain tumor detection and classification.\n\nThis image shows a brain with: "
+    return_value += predicted_class
+    return return_value
 
 
 def tuberculosis_detection(image_route):
@@ -191,7 +195,7 @@ def tuberculosis_detection(image_route):
     )
     red = image_classificator(3).to("cuda")
     red.load_state_dict(model["model_state_dict"])
-    classes = ["healthy lungs", "pneumonia", "tuberculosis"]
+    classes = ["healthy", "pneumonia", "tuberculosis"]
     images = cv2.imread(image_route)
     images = cv2.cvtColor(images, cv2.COLOR_BGR2RGB)
     image_to_predict = images_transform(images)
@@ -201,7 +205,9 @@ def tuberculosis_detection(image_route):
         output = red(image_to_predict.to("cuda"))
     output_label = torch.topk(output, 1)
     predicted_class = classes[int(output_label.indices)]
-    return predicted_class
+    return_value = "This image represents a X-RAY image used for Tuberculosis or pneumonia detection.\n\nThis image shows: "
+    return_value += predicted_class
+    return return_value
 
 
 def main():
