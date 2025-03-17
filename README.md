@@ -1,7 +1,6 @@
-# Implementation of Neural Networks for Automated Medical Image Diagnosis
+# IMPLEMENTACIÓN DE REDES NEURONALES PARA DIAGNÓSTICOS AUTOMATIZADOS DE IMÁGENES MÉDICAS: TUMORES CEREBRALES, ALZHEIMER, NEUMONÍA Y TUBERCULOSIS
 
-# IMPLEMENTACIÓN DE REDES NEURONALES PARA DIAGNÓSTICOS AUTOMATIZADOS
-DE IMÁGENES MÉDICAS: TUMORES CEREBRALES, ALZHEIMER, NEUMONÍA Y TUBERCULOSIS
+# Implementation of Neural Networks for Automated Medical Image Diagnosis
 
 This repository contains the results and progress of the graduation project titled **"Implementation of Neural Networks for Automated Medical Image Diagnosis."** The main objective of this project is to develop a program based on Convolutional Neural Networks (CNNs) for detecting and classifying diseases such as brain tumors and Alzheimer's using MRI scans, as well as tuberculosis and pneumonia from chest X-rays.
 
